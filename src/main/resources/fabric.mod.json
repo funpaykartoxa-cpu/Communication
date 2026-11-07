@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "id": "communication",
+  "version": "${version}",
+  "name": "Communication",
+  "description": "Party, friend marks and the ESC party overlay in one lightweight client mod.",
+  "authors": [
+    "dezzDev",
+    "fruz"
+  ],
+  "contact": {
+    "homepage": "https://deltaclient.xyz/"
+  },
+  "license": "Minecraft EULA",
+  "icon": "assets/communication/icon.png",
+  "environment": "client",
+  "entrypoints": {
+    "client": [
+      "communication.CommunicationMod"
+    ]
+  },
+  "mixins": [
+    "communication.mixins.json"
+  ],
+  "depends": {
+    "fabricloader": ">=0.16.5",
+    "minecraft": "~1.21.4",
+    "java": ">=21",
+    "fabric-api": "*"
+  }
+}
