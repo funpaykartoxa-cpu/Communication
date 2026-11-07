@@ -2,6 +2,7 @@ package communication.ui;
 
 import communication.CommunicationMod;
 import communication.config.CommunicationConfig;
+import communication.input.CommunicationKeys;
 import communication.party.PartyManager;
 import communication.render.ColorUtil;
 import communication.render.Fonts;
@@ -31,7 +32,7 @@ public final class CommunicationScreen extends Screen {
     private static final int PRIMARY = Theme.PRIMARY;
     private static final int TEXT = Theme.TEXT;
     private static final int MUTED = Theme.MUTED;
-    private static final int OPEN_KEY = 344;
+    private static final int OPEN_KEY = CommunicationKeys.MENU_KEY;
 
     private static final float MASTER_X = 16.0f;
     private static final float MASTER_Y = 58.0f;
@@ -189,7 +190,7 @@ public final class CommunicationScreen extends Screen {
 
     private void drawBinds(DrawContext context, float mouseX, float mouseY) {
         label("МЕТКИ", 20.0f, 167.0f, 6.5f, MUTED);
-        labelRight("клавиши работают в игре", PANEL_WIDTH - 20.0f, 167.0f, 6.0f, MUTED);
+        labelRight("здесь или в управлении", PANEL_WIDTH - 20.0f, 167.0f, 6.0f, MUTED);
 
         drawBindRow(context, mouseX, mouseY, BIND_ROW_1, "Метка пати", BindTarget.PARTY,
                 this.config.partyMarkBind);
@@ -236,8 +237,8 @@ public final class CommunicationScreen extends Screen {
     }
 
     private void drawFooter(DrawContext context) {
-        labelCentered("Right Shift — открыть меню   /   ESC — закрыть", PANEL_WIDTH / 2.0f, 284.0f, 6.0f,
-                MUTED);
+        labelCentered("Right Shift — открыть меню   /   ESC — закрыть   /   клавиши — в управлении",
+                PANEL_WIDTH / 2.0f, 284.0f, 6.0f, MUTED);
     }
 
     private void drawSwitch(DrawContext context, float x, float y, boolean on, boolean hovered) {
@@ -455,11 +456,13 @@ public final class CommunicationScreen extends Screen {
     }
 
     private void assignBind(BindTarget target, int keyCode) {
+        int safe = keyCode == OPEN_KEY ? -1 : keyCode;
         if (target == BindTarget.PARTY) {
-            this.config.partyMarkBind = keyCode;
+            this.config.partyMarkBind = safe;
         } else {
-            this.config.friendMarkBind = keyCode;
+            this.config.friendMarkBind = safe;
         }
+        CommunicationKeys.setBind(target == BindTarget.FRIEND, safe);
         this.config.save();
     }
 

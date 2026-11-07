@@ -3,6 +3,7 @@ package communication;
 import communication.command.PartyCommands;
 import communication.config.CommunicationConfig;
 import communication.friend.FriendMarkManager;
+import communication.input.CommunicationKeys;
 import communication.network.BackendClient;
 import communication.party.PartyManager;
 import communication.party.PartyOverlay;
@@ -28,7 +29,6 @@ import org.slf4j.LoggerFactory;
 public final class CommunicationMod implements ClientModInitializer {
     public static final String MOD_ID = "communication";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private static final int MENU_KEY = 344;
 
     private static CommunicationMod instance;
 
@@ -38,8 +38,6 @@ public final class CommunicationMod implements ClientModInitializer {
     private FriendMarkManager friends;
     private BackendClient backend;
     private boolean menuDown;
-    private boolean partyMarkDown;
-    private boolean friendMarkDown;
 
     public static CommunicationMod get() {
         return instance;
@@ -48,7 +46,9 @@ public final class CommunicationMod implements ClientModInitializer {
     @Override
     public void onInitializeClient() {
         instance = this;
+        CommunicationKeys.register();
         this.config = CommunicationConfig.load();
+        CommunicationKeys.applyConfig(this.config);
         this.party = new PartyManager();
         this.friends = new FriendMarkManager();
         this.backend = new BackendClient(this::onPacket, this::identity);
@@ -79,7 +79,7 @@ public final class CommunicationMod implements ClientModInitializer {
                     !PartyOverlay.mouseClicked(mouseX, mouseY, button));
         });
 
-        LOGGER.info("Communication initialized (party, friend marks, ESC overlay, settings)");
+        LOGGER.info("Communication initialized (party, friend marks, ESC overlay, settings, controls key binds)");
     }
 
     private void tick() {
@@ -88,19 +88,21 @@ public final class CommunicationMod implements ClientModInitializer {
         }
         this.party.tick();
         this.friends.tick();
+        CommunicationKeys.syncFromBindings(this.config);
+
+        boolean partyPressed = CommunicationKeys.consumePartyPress();
+        boolean friendPressed = CommunicationKeys.consumeFriendPress();
 
         boolean inWorld = this.mc.player != null && this.mc.world != null;
         if (!inWorld) {
             this.menuDown = false;
-            this.partyMarkDown = false;
-            this.friendMarkDown = false;
             return;
         }
 
         long handle = this.mc.getWindow().getHandle();
         boolean menuPressed = false;
         if (handle != 0L) {
-            boolean menu = InputUtil.isKeyPressed(handle, MENU_KEY);
+            boolean menu = InputUtil.isKeyPressed(handle, CommunicationKeys.MENU_KEY);
             menuPressed = menu && !this.menuDown;
             this.menuDown = menu;
         } else {
@@ -112,38 +114,21 @@ public final class CommunicationMod implements ClientModInitializer {
             return;
         }
         if (this.mc.currentScreen != null) {
-            this.partyMarkDown = false;
-            this.friendMarkDown = false;
             return;
         }
         if (!this.config.enabled) {
-            this.partyMarkDown = false;
-            this.friendMarkDown = false;
             return;
         }
 
-        if (this.config.partyMarkBind >= 0 && this.config.partyMarkBind != MENU_KEY && handle != 0L) {
-            boolean pressed = InputUtil.isKeyPressed(handle, this.config.partyMarkBind);
-            if (pressed && !this.partyMarkDown) {
-                if (this.party.isActive()) {
-                    this.party.sendMark();
-                } else {
-                    communication.util.ChatUtil.send("&7Вы не в пати.");
-                }
+        if (partyPressed) {
+            if (this.party.isActive()) {
+                this.party.sendMark();
+            } else {
+                communication.util.ChatUtil.send("&7Вы не в пати.");
             }
-            this.partyMarkDown = pressed;
-        } else {
-            this.partyMarkDown = false;
         }
-
-        if (this.config.friendMarkBind >= 0 && this.config.friendMarkBind != MENU_KEY && handle != 0L) {
-            boolean pressed = InputUtil.isKeyPressed(handle, this.config.friendMarkBind);
-            if (pressed && !this.friendMarkDown) {
-                this.friends.sendMark();
-            }
-            this.friendMarkDown = pressed;
-        } else {
-            this.friendMarkDown = false;
+        if (friendPressed) {
+            this.friends.sendMark();
         }
     }
 

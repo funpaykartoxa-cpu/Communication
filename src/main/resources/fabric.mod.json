@@ -3,15 +3,16 @@
   "id": "communication",
   "version": "${version}",
   "name": "Communication",
-  "description": "Party, friend marks and the ESC party overlay in one lightweight client mod.",
+  "description": "Party, friend marks, the ESC party overlay and Controls key binds in one lightweight client mod.",
   "authors": [
-    "dezzDev",
-    "fruz"
+    "VQ",
+    "TOP3R_PVP"
   ],
   "contact": {
-    "homepage": "https://deltaclient.xyz/"
+    "homepage": "https://github.com/funpaykartoxa-cpu/Communication",
+    "sources": "https://github.com/funpaykartoxa-cpu/Communication"
   },
-  "license": "Minecraft EULA",
+  "license": "LGPL-3.0-only",
   "icon": "assets/communication/icon.png",
   "environment": "client",
   "entrypoints": {
